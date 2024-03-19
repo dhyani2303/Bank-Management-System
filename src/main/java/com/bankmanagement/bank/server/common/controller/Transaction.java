@@ -7,18 +7,24 @@ import com.bankmanagement.bank.server.common.util.Validation;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class Transaction
 {
     Database database = null;
-
     String bankCode = null;
 
-    public Transaction(Database database,String bankCode)
+  private Logger LOGGER;
+
+    public Transaction(Logger LOGGER, Database database, String bankCode)
     {
         this.database = database;
 
         this.bankCode = bankCode;
+
+        this.LOGGER = LOGGER;
+
+
 
     }
 
@@ -88,6 +94,8 @@ public class Transaction
 
                 clientWriter.println("Amount Deposition Successful! Your updated balance is " + updatedBalance);
 
+                LOGGER.info("Customer with  customer id "+ customerId + " deposited " + amountToDeposit);
+
                 rbiWriter.flush();
 
                 rbiWriter.println(bankCode + "2");
@@ -103,17 +111,10 @@ public class Transaction
             }
 
 
-        } catch(NumberFormatException e)
-        {
-            System.out.println("Enter number only");
-
-            deposit(clientReader,customerId,clientWriter,rbiWriter);
-
-
         }
         catch(IOException e)
         {
-            e.printStackTrace();
+           LOGGER.warning(e.getMessage());
         }
 
     }
@@ -130,13 +131,13 @@ public class Transaction
 
                 double balance = database.getCustomer(customerId).getAccountDetails().withdrawAmount(amountToWithdraw);
 
-
                 clientWriter.println(amountToWithdraw + " has been withdrawn from your account. Your updated balance is " + balance);
+
+                LOGGER.info("Customer with  customer id "+ customerId + " withdrew " + amountToWithdraw);
 
                 rbiWriter.println(bankCode + "3");
 
                 rbiWriter.println(customerId +" "+ amountToWithdraw);
-
             }
             else
             {
@@ -144,17 +145,10 @@ public class Transaction
 
             }
 
-        }catch(NumberFormatException e)
-        {
-            System.out.println("Enter number only");
-
-            withdraw(clientReader,customerId,clientWriter,rbiWriter);
-
-
         }
         catch(IOException e)
         {
-            e.printStackTrace();
+          LOGGER.warning(e.getMessage());
         }
 
     }
@@ -178,6 +172,9 @@ public class Transaction
                     double balance = database.getCustomer(customerId).getAccountDetails().transfer(payeeCustomerId, amount, database);
 
                     clientWriter.println("Transfer done successfully! Your remaining balance is " + balance);
+
+                    LOGGER.info("Customer with  customer id "+ customerId + " transferred " + amount + " to customer "+ payeeCustomerId);
+
 
                     rbiWriter.println(bankCode + "4");
 
@@ -205,7 +202,7 @@ public class Transaction
 
         catch(IOException e)
         {
-            e.printStackTrace();
+            LOGGER.warning(e.getMessage());
         }
     }
 
@@ -221,7 +218,7 @@ public class Transaction
     {
         clientWriter.println("Logging out");
 
-        System.out.println("Customer with customer Id " + customerId + " logged out");
+        LOGGER.info("Customer with customer Id " + customerId + " logged out");
 
     }
 

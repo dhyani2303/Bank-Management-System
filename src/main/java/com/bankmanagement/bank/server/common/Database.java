@@ -14,11 +14,7 @@ public class Database
         {
             CUSTOMER.put(customer.getAccountDetails().getCustomerId(), customer);
 
-            System.out.println("Addition to database is successful");
-
-
         }
-
 
     }
 

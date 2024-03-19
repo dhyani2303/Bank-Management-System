@@ -6,4 +6,9 @@ public class Validation
     {
         return  (data.length()==length && data.matches("[0-9]+"));
     }
+
+    public static boolean isValidString(String name)
+    {
+        return (name!=null && name.matches("[a-zA-Z]{3,}"));
+    }
 }

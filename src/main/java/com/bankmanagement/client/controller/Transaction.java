@@ -8,15 +8,40 @@ public class Transaction
 {
     String NEXT_LINE = "\n";
 
+    private boolean isServerDown = false;
+
     public void giveChoice(BufferedReader consoleReader, PrintWriter serverWriter, BufferedReader serverReader)
     {
         while(true)
         {
+
+            if(isServerDown)
+            {
+                try
+                {
+                    System.out.println("Server is down for a while");
+
+                    consoleReader.close();
+
+                    serverWriter.close();
+
+                    serverReader.close();
+
+                } catch(IOException e)
+                {
+                    e.printStackTrace();
+                }
+                break;
+
+            }
             System.out.println("Select the option to perform the operation" + NEXT_LINE +
                     "1.Deposit" + NEXT_LINE + "2.Withdraw " + NEXT_LINE + "3.Transfer" +NEXT_LINE +"4.Get Balance" +NEXT_LINE + "5.Logout"+ NEXT_LINE);
 
             try
             {
+
+                System.out.print("Enter your choice : ");
+
                 String operationCode = consoleReader.readLine();
 
                 switch(operationCode)
@@ -72,7 +97,7 @@ public class Transaction
 
             } catch(IOException e)
             {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
 
         }
@@ -90,9 +115,21 @@ public class Transaction
 
             serverWriter.println(amountToDeposit);
 
+
+
             String response = serverReader.readLine();
 
-            System.out.println(NEXT_LINE+ response + NEXT_LINE);
+            if(response!=null)
+            {
+
+                System.out.println(NEXT_LINE + response + NEXT_LINE);
+
+            }
+            else
+            {
+                isServerDown = true;
+
+            }
 
         }
         catch(NumberFormatException e)
@@ -100,7 +137,6 @@ public class Transaction
             System.out.println("Enter number only");
 
             deposit(consoleReader,serverWriter,serverReader);
-
 
         }
         catch(IOException e)
@@ -123,7 +159,16 @@ public class Transaction
 
             String response = serverReader.readLine();
 
-            System.out.println(NEXT_LINE+response + NEXT_LINE);
+            if(response!=null)
+            {
+
+                System.out.println(NEXT_LINE + response + NEXT_LINE);
+            }
+            else
+            {
+
+                isServerDown = true;
+            }
 
 
         }
@@ -154,21 +199,37 @@ public class Transaction
 
             if(serverReader.readLine().equals("true"))
             {
-                System.out.println(NEXT_LINE +"Enter the amount to be transmitted");
+                System.out.println("Enter the amount to be transmitted");
 
                 int amountToTransfer = Integer.parseInt(consoleReader.readLine());
 
                 serverWriter.println(amountToTransfer);
 
+
                 String response = serverReader.readLine();
 
-                System.out.println(NEXT_LINE+ response + NEXT_LINE);
+                if(response!=null)
+                {
+                    System.out.println(NEXT_LINE + response + NEXT_LINE);
+                }
+                else
+                {
+                    isServerDown = true;
+                }
+
             }
             else
             {
                 String response = serverReader.readLine();
 
-                System.out.println(response);
+                if(response!=null)
+                {
+                    System.out.println(NEXT_LINE + response + NEXT_LINE);
+                }
+                else
+                {
+                    isServerDown = true;
+                }
             }
         }
         catch(NumberFormatException e)
@@ -190,7 +251,15 @@ public class Transaction
         {
             String response = (serverReader.readLine());
 
-            System.out.println(NEXT_LINE+response+ NEXT_LINE);
+
+            if(response!=null)
+            {
+                System.out.println(NEXT_LINE + response + NEXT_LINE);
+            }
+            else
+            {
+                isServerDown = true;
+            }
 
         } catch(IOException e)
         {

@@ -44,11 +44,6 @@ public class Validation
         return false;
     }
 
-    public static boolean isValidString(String name)
-    {
-        return (name!=null && name.matches("[a-zA-Z]{3,}"));
-    }
-
 
 
 }

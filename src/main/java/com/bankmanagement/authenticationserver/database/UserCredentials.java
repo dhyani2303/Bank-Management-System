@@ -33,13 +33,14 @@ public class UserCredentials
         return  CREDENTIAL;
     }
 
-    public void add(String customerId,String password) {
+    public boolean add(String customerId,String password) {
 
-        CREDENTIAL.put(Integer.parseInt(customerId),Integer.parseInt(password));
+       CREDENTIAL.put(Integer.parseInt(customerId),Integer.parseInt(password));
 
-        System.out.println("Successful addition to authentication server database");
+       return  true;
 
-        System.out.println(CREDENTIAL);
+
+
 
     }
 

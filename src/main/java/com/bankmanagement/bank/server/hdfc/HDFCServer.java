@@ -6,18 +6,15 @@ import com.bankmanagement.bank.server.common.Database;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class HdfcServer extends BankServer
+public class HDFCServer extends BankServer
 {
     final static Database hdfcDatabase = new Database();
     final static int SERVER_PORT =3000;
 
-
     final static String bankCode = "1";
 
 
-
-
-    HdfcServer()
+    HDFCServer()
     {
 
         super(hdfcDatabase,"HDFC",bankCode);
@@ -31,13 +28,14 @@ public class HdfcServer extends BankServer
 
             InetAddress rbiAddress = InetAddress.getByName("localhost");
 
-            HdfcServer server = new HdfcServer();
+            HDFCServer server = new HDFCServer();
 
             server.startServer(SERVER_PORT,authAddress,rbiAddress);
 
         } catch(UnknownHostException e)
         {
-            e.printStackTrace();
+
+            LOGGER.warning(e.getMessage());
         }
 
     }

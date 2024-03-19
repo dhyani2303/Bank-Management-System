@@ -2,151 +2,155 @@ package com.bankmanagement.bank.server.common.controller;
 
 
 import com.bankmanagement.bank.server.common.Database;
+import com.bankmanagement.bank.server.common.util.Logging;
 import com.bankmanagement.bank.server.common.util.Validation;
 import com.bankmanagement.bank.server.common.models.CustomerDetails;
 import com.google.gson.Gson;
 
 import java.io.*;
+import java.util.logging.Logger;
 
 
 public class Authentication implements Serializable
 {
     Database database = null;
 
+ //   private Logger LOGGER;
+
+    protected static  final Logger LOGGER = Logging.getBankServerLogger();
+
     String bankCode;
 
 
-    public Authentication(Database database, String bankCode)
+    public Authentication(Logger LOGGER, Database database, String bankCode)
     {
         this.database = database;
 
         this.bankCode = bankCode;
+
+     //   this.LOGGER = LOGGER;
     }
 
 
     final String NEXT_LINE = "\n";
 
-    public void register(BufferedReader reader, PrintWriter authWriter, PrintWriter rbiWriter)
+    public void register(BufferedReader clientReader, PrintWriter authWriter, PrintWriter rbiWriter,PrintWriter clientWriter)
     {
-        boolean stop = false;
 
-        String firstName = "";
-
-        String lastName = "";
-        synchronized(Authentication.class)
+        try
         {
 
-            try
-            {
-                authWriter.println("1");
+            authWriter.println("1");
+//            String[] data = clienteReader.readLine().split(" ");
+//
+//            String firstName = data[0];
+//
+//            String lastName = data[1];
 
-                System.out.println(NEXT_LINE + "Enter the following details for registration process" + NEXT_LINE + "Name should at least consist of 3 letters" + NEXT_LINE);
+            String firstName = clientReader.readLine();
 
+            String lastName = clientReader.readLine();
 
-                while(!stop)
-                {
+            System.out.println(firstName + " " + lastName);
 
-                    System.out.println(NEXT_LINE + "Enter the first name");
+          //  LOGGER.info(firstName + " " + lastName);
 
-                    firstName = reader.readLine();
+            CustomerDetails customerDetail = new CustomerDetails(firstName, lastName);
 
-                    if(Validation.isValidString(firstName))
-                    {
-                        stop = true;
+            int customerId = customerDetail.getAccountDetails().getCustomerId();
 
-                        break;
-                    }
+            database.addCustomer(customerDetail);
 
-                    System.out.println("Invalid first name " + NEXT_LINE);
+           clientWriter.println("Registration successful " + ":" + "Account Number is " + customerDetail.getAccountDetails().getAccountNo() + ":"+ "The customer number is " + customerDetail.getAccountDetails().getCustomerId() + ":" + "The password is " + customerDetail.getAccountDetails().getPassword());
 
-                }
+            LOGGER.info("Registered client with account number " + customerDetail.getAccountDetails().getAccountNo() + " and customer id " + customerId + " password is "+ customerDetail.getAccountDetails().getPassword());
 
-                stop = false;
+            authWriter.println(customerId + " " + customerDetail.getAccountDetails().getPassword());
 
+            rbiWriter.println(bankCode + "1");
 
-                while(!stop)
-                {
+            Gson gson = new Gson();
 
-                    System.out.println(NEXT_LINE + "Enter the last name");
+            String jsonCustomerDetails = gson.toJson(customerDetail);
 
-                    lastName = reader.readLine();
-
-                    if(Validation.isValidString(lastName))
-                    {
-
-                        stop = true;
-
-                        break;
-                    }
-                    System.out.println("Invalid last name " + NEXT_LINE);
-
-                }
-                CustomerDetails customerDetail = new CustomerDetails(firstName, lastName);
-
-                int customerId = customerDetail.getAccountDetails().getCustomerId();
-
-                database.addCustomer(customerDetail);
-
-                System.out.println(NEXT_LINE + "Registration successful " + NEXT_LINE);
-
-                System.out.println(NEXT_LINE + "Account Number is " + customerDetail.getAccountDetails().getAccountNo() + NEXT_LINE + "The customer number is " + customerDetail.getAccountDetails().getCustomerId() + NEXT_LINE + "The password is " + customerDetail.getAccountDetails().getPassword());
-
-                authWriter.println(customerId);
-
-                authWriter.println(customerDetail.getAccountDetails().getPassword());
-
-                rbiWriter.println(bankCode + "1");
-
-                Gson gson = new Gson();
-
-                String jsonCustomerDetails = gson.toJson(customerDetail);
-
-                rbiWriter.println(jsonCustomerDetails);
+            rbiWriter.println(jsonCustomerDetails);
 
 
-            } catch(IOException e)
-            {
-                e.printStackTrace();
-            }
+        } catch(IOException e)
+        {
+            LOGGER.warning(e.getMessage());
         }
-
     }
 
-    public String login(BufferedReader clientReader, PrintWriter authWriter)
+
+    public void login(BufferedReader clientReader,PrintWriter clientWriter, PrintWriter authWriter,BufferedReader authReader,PrintWriter rbiWriter)
     {
         String customerId = null;
 
         try
         {
+           String[] data = clientReader.readLine().split(" ");
 
-            customerId = clientReader.readLine();
+           customerId = data[0];
 
-            String password = clientReader.readLine();
+           String password = data[1];
 
             if(Validation.CustomerExists(Integer.parseInt(customerId), database))
             {
                 authWriter.println("2");
 
-                authWriter.println(customerId);
+                authWriter.println(customerId + " " + password);
 
-                authWriter.println(password);
 
-                return customerId;
+                String verificationResponse = authReader.readLine();
 
+
+                if(verificationResponse!=null)
+                {
+
+                    LOGGER.info("Verification response from authentication server " + verificationResponse);
+
+                    if(verificationResponse.equals("true"))
+                    {
+                        clientWriter.println("true");
+
+                        LOGGER.info("Customer with customer Id "+ customerId + " logged in");
+
+                        clientWriter.println(CustomerDetails.displayCustomerInfo(Integer.parseInt(customerId),database));
+
+                        Transaction transactionController = new Transaction(LOGGER, database, bankCode);
+
+                        transactionController.getChoice(clientReader, Integer.parseInt(customerId), clientWriter, rbiWriter);
+
+                    }
+                    else
+                    {
+                        LOGGER.info("Customer with customer Id "+ customerId + " entered wrong in");
+
+                        clientWriter.println("false");
+                    }
+
+                }
+
+
+            }
+            else
+            {
+                clientWriter.println(false);
             }
 
 
         } catch(IOException e)
         {
-            e.printStackTrace();
+            LOGGER.warning(e.getMessage());
         }
-
-
-        return "-1";
 
     }
 
 }
+
+
+
 
 
 

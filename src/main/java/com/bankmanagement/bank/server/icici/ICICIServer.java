@@ -1,26 +1,27 @@
-package com.bankmanagement.bank.server.sbi;
+package com.bankmanagement.bank.server.icici;
 
 import com.bankmanagement.bank.server.common.BankServer;
 import com.bankmanagement.bank.server.common.Database;
-import com.bankmanagement.bank.server.icici.IciciServer;
+
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class SbiServer extends BankServer
+public class ICICIServer extends BankServer
 {
-    final static Database sbiDatabase = new Database();
 
-    final static int SERVER_PORT = 3002;
+    final static Database iciciDatabase = new Database();
+
+    final static int SERVER_PORT = 3001;
+
+    ;
+    final static String BANK_CODE = "2";
 
 
-    final static String BANK_CODE = "3";
-
-
-    SbiServer()
+    ICICIServer()
     {
 
-        super(sbiDatabase, "SBI",BANK_CODE);
+        super(iciciDatabase, "ICICI", BANK_CODE);
     }
 
     public static void main(String[] args)
@@ -31,13 +32,13 @@ public class SbiServer extends BankServer
 
             InetAddress rbiAddress = InetAddress.getByName("localhost");
 
-            SbiServer server = new SbiServer();
+            ICICIServer server = new ICICIServer();
 
             server.startServer(SERVER_PORT, authAddress,rbiAddress);
 
         } catch(UnknownHostException e)
         {
-            e.printStackTrace();
+           LOGGER.warning(e.getMessage());
         }
 
     }

@@ -20,6 +20,16 @@ target/
 .settings
 .springBeans
 .sts4-cache
+auth_server.log
+auth_server.log.1
+auth_server.log.2
+bank_server.log
+bank_server.log.1
+bank_server.log.2
+rbi_server.log
+rbi_server.log.1
+rbi_server.log.2
+.gitignore
 
 ### NetBeans ###
 /nbproject/private/

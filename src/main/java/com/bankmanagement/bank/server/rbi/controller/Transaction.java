@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public class Transaction
 {
@@ -14,9 +15,13 @@ public class Transaction
     int customerId;
     int amount;
 
-    public Transaction(Database database)
+   private Logger LOGGER ;
+
+    public Transaction(Database database, Logger LOGGER)
     {
         this.database = database;
+
+        this.LOGGER = LOGGER;
 
     }
 
@@ -33,15 +38,11 @@ public class Transaction
 
             database.addCustomer(customerDetails);
 
-            double balance = database.getCustomer(customerId).getAccountDetails().getBalance();
-
-            System.out.println("balance = " + balance);
-
-
+            LOGGER.info("Customer with customer id "+ customerDetails.getAccountDetails().getCustomerId() + " is registered");
 
         } catch(IOException e)
         {
-            System.out.println(e.getMessage());
+            LOGGER.warning(e.getMessage());
         }
 
     }
@@ -56,13 +57,13 @@ public class Transaction
 
             amount = Integer.parseInt(response[1]);
 
-            double balance = database.getCustomer(customerId).getAccountDetails().depositAmount(amount);
+            database.getCustomer(customerId).getAccountDetails().depositAmount(amount);
 
-            System.out.println("Updated user with customer id " + customerId + " Balance is " + balance);
+            LOGGER.info("Customer with customer id "+ customerId + " deposited "+ amount);
 
         } catch(IOException e)
         {
-            System.out.println(e.getMessage());
+            LOGGER.warning(e.getMessage());
         }
 
 
@@ -78,13 +79,13 @@ public class Transaction
 
              amount = Integer.parseInt(response[1]);
 
-            double balance = database.getCustomer(customerId).getAccountDetails().withdrawAmount(amount);
+           database.getCustomer(customerId).getAccountDetails().withdrawAmount(amount);
 
-            System.out.println("Updated user with customer id " + customerId + " Balance is " + balance);
+       LOGGER.info("Customer with customer id "+ customerId + " withdrew "+ amount);
 
         } catch(IOException e)
         {
-            System.out.println(e.getMessage());
+           LOGGER.warning(e.getMessage());
         }
 
 
@@ -103,15 +104,14 @@ public class Transaction
 
                 int customerIdOfPayee = Integer.parseInt(response[2]);
 
-                double balance = database.getCustomer(customerId).getAccountDetails().transfer(customerIdOfPayee,amount,database);
+                database.getCustomer(customerId).getAccountDetails().transfer(customerIdOfPayee,amount,database);
 
-                System.out.println("Updated user with customer id "+ customerId + " Balance is "+ balance);
+                LOGGER.info("Customer with  customer id "+ customerId + " transferred " + amount + " to customer "+ customerIdOfPayee);
 
-                System.out.println("Updated balance of payee is "+ database.getCustomer(customerIdOfPayee).getAccountDetails().getBalance());
 
             } catch(IOException e)
             {
-                System.out.println(e.getMessage());
+                LOGGER.warning(e.getMessage());
             }
 
 

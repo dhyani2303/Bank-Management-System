@@ -15,7 +15,9 @@ public class ClientFile
 
     public static void main(String[] args)
     {
-        Socket socket=null;
+        Socket socket = null;
+
+        final String NEXT_LINE = "\n";
         try
         {
             InetAddress address = InetAddress.getByName("localhost");
@@ -30,11 +32,38 @@ public class ClientFile
 
                     BufferedReader serverReader = new BufferedReader(new InputStreamReader(socket.getInputStream())))
                 {
-                    Login.login(consoleReader, serverWriter, serverReader);
+
+                    System.out.println("Already Existing Customer? Press 1" + NEXT_LINE + "Create a new Account now. Press 2");
+
+                    String operationCode = consoleReader.readLine();
+
+                    switch(operationCode)
+                    {
+                        case "1":
+                        {
+                            Login.login(consoleReader, serverWriter, serverReader);
+
+                            break;
+
+                        }
+
+                        case "2":
+                        {
+                            Login.register(consoleReader, new PrintWriter(socket.getOutputStream(), true), serverReader);
+
+                            Login.login(consoleReader, serverWriter, serverReader);
+
+                            break;
+                        }
+                        default:
+                        {
+                            System.out.println("Invalid choice");
+                        }
+                    }
+
 
                 }
-            }
-            catch(IOException e)
+            } catch(IOException e)
             {
                 System.out.println("Server is down as of now! Try again later");
             }
@@ -43,10 +72,9 @@ public class ClientFile
         {
             System.out.println(e.getMessage());
 
-        }
-        finally
+        } finally
         {
-            if(socket!=null)
+            if(socket != null)
             {
                 try
                 {

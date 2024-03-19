@@ -1,6 +1,7 @@
 package com.bankmanagement.bank.server.rbi;
 
 import com.bankmanagement.bank.server.common.Database;
+import com.bankmanagement.bank.server.common.util.Logging;
 import com.bankmanagement.bank.server.rbi.controller.Transaction;
 
 import java.io.*;
@@ -9,10 +10,12 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 public class RBIServer
 {
     final static HashMap<String, Database> bankDatabases = new HashMap<>();
+    final static Logger LOGGER = Logging.getRbiServerLogger();
 
     final static Database hdfc = new Database();
 
@@ -34,13 +37,14 @@ public class RBIServer
 
         try(ServerSocket serverSocket = new ServerSocket(8000))
         {
-            System.out.println("RBI waiting for other banks to connect");
+
+            LOGGER.info("RBI waiting for other banks to connect");
 
             while(true)
             {
                 Socket clientSocket = serverSocket.accept();
 
-                System.out.println("Client got connected");
+                LOGGER.info("Bank got connected");
 
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
 
@@ -51,7 +55,7 @@ public class RBIServer
 
         } catch(IOException e)
         {
-            System.out.println(e.getMessage());
+            LOGGER.warning(e.getMessage());
         } finally
         {
             executorService.shutdown();
@@ -85,7 +89,7 @@ public class RBIServer
 
                         Database database = bankDatabases.get(bankCode);
 
-                        Transaction transaction = new Transaction(database);
+                        Transaction transaction = new Transaction(database,LOGGER);
 
                         switch(operation)
                         {
@@ -94,22 +98,14 @@ public class RBIServer
                             case "1":
                             {
 
-                                System.out.println("entered registration");
-
                                 transaction.register(reader);
-
-                                System.out.println("Completed registration");
 
                                 break;
                             }
                             case "2":
                             {
 
-                                System.out.println("Entered deposit");
-
                                 transaction.deposit(reader);
-
-                                System.out.println("Completed deposit");
 
                                 break;
 
@@ -122,11 +118,8 @@ public class RBIServer
                             }
                             case "4":
                             {
-                                System.out.println("Entered transfer");
 
                                 transaction.transfer(reader);
-
-                                System.out.println("Completed transfer");
 
                                 break;
                             }
@@ -138,7 +131,7 @@ public class RBIServer
                 }
             } catch(IOException e)
             {
-                e.printStackTrace();
+               LOGGER.warning(e.getMessage());
             }
 
 
